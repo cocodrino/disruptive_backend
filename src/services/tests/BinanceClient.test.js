@@ -1,14 +1,12 @@
 import BinanceClient from '../ExchangeClient/BinanceClient'
 import Dotenv from 'dotenv'
+import {BinanceRealAccount, BinanceTestnetAccount} from "../defaultInstances/Binance";
 
 Dotenv.config()
 
 describe('for BinanceClient API (api/no testnet)', () => {
-  let binance
+  let binance = BinanceRealAccount
 
-  beforeEach(() => {
-    binance = new BinanceClient({APIKEY: process.env.APIKEY, APISECRET: process.env.APISECRET})
-  });
 
   it('can get Pairs', async () => {
     const pairs = await binance.getPairs()
@@ -34,23 +32,34 @@ describe('for BinanceClient API (api/no testnet)', () => {
 });
 
 describe('for BinanceClient API (testnet)',() => {
-  let binance
+  let binance = BinanceTestnetAccount
 
-  beforeEach(() => {
-    Dotenv.config()
-    binance = new BinanceClient({APIKEY: process.env.TESTNETAPIKEY, APISECRET: process.env.TESTNETAPISECRET},true)
-  });
+  it("can get pairs",async()=>{
+    let pairs = await binance.getPairs()
+    expect(pairs).toBeDefined()
+  },10000000)
 
-  afterEach(() => {
-
-  });
 
   it('can Place a new Order', async () => {
-    const pairs = await binance.getPairs()
-    expect(pairs).toBeDefined()
-    expect(Array.isArray(pairs)).toBeTruthy()
-    expect(pairs.length).toBeGreaterThan(0)
+
+    const losers = await binance.getTopLosers("BTC",1)
+    const {symbol,price} = losers[0]
+    const discountPrice = +(price * (1 - (30/100)).toFixed(8) ) //if price is 100 and discount is 30 discountPrice = 70
+
+    let quantity = (0.0005/discountPrice) //this is to buy always buy nearly $10
+
+    console.debug(`losing pair is ${symbol} ${discountPrice}`)
+    const order = await binance.setLimitOrder(symbol,quantity,discountPrice)
+
+    expect(order).toBeDefined()
   },10000000);
+
+  it("can place order",async()=>{
+      const order = await binance.setLimitOrder("ETHBTC",0.007853701253058034,0.06366425)
+      expect(order).toBeDefined()
+
+
+  },10000000)
 
 
 })

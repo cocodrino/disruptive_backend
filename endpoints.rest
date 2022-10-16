@@ -1,0 +1,15 @@
+### Get Top losers
+GET http://localhost:3000/market/top-losers
+
+### Get Top losers passing count
+GET http://localhost:3000/market/top-losers?count=3
+
+###Get user info
+GET http://localhost:3000/user/info/<mongo user ID>
+
+###Place order limit (default will put an order 5% less current price and quote BTC)
+POST http://localhost:3000/order/limit
+
+###Place order limit setting discount manually
+POST http://localhost:3000/order/limit?discount=10
+
